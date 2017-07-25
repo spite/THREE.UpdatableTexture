@@ -10,6 +10,7 @@ Check a [demo of partially updated texture](https://spite.github.io/THREE.Updata
 
 [![UpdatableTexture Demo](https://raw.githubusercontent.com/spite/THREE.UpdatableTexture/master/about/updatabletexture.jpg)](https://spite.github.io/THREE.UpdatableTexture)
 
+The demo uses a 512x512 texture updated with blocks of 32x32. The best texture size and tile size it's a bit up to your target performance.
 
 #### How to use ####
 Include the modified three.js lib and the script in your project:
