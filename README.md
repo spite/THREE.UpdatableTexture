@@ -4,7 +4,7 @@ An extended `THREE.Texture` to provide support for partial updates, via [`texSub
 
 `UpdatableTexture` lets you update only a part of a texture: it's useful for incremental loads of large images, for tiled resources, etc.
 
-**WARNING: requires a slightly modified version of three.js**
+**WARNING: requires a slightly modified version of three.js (see below for the reason)**
 
 Check a [demo of partially updated texture](https://spite.github.io/THREE.UpdatableTexture/).
 
@@ -43,6 +43,16 @@ texture.update( source, x, y );
 `source` can be an `ArrayBufferView`, an `ImageData`, an `HTMLImageElement`, an `HTMLCanvasElement`, an `HTMLVideoElement` or an `ImageBitmap`.
 
 `x` and `y` are the offsets inside the big texture in which to draw the smaller texture. The width and height of the smaller texture is read from the resource. Make sure offset plus dimensions is not bigger than the large texture dimensions.
+
+#### Modified three.js ####
+
+Since this is an object outside of the core of the library, it doesn't have access to some properties and methods from three.js. In order to convert three.js parameters to WebGL, there's a function called `paramThreeToGL` that needs to be publicly accessible. So after that function is defined in the code, just needs:
+
+```js
+this.paramThreeToGL = paramThreeToGL;
+```
+
+and it's accesible via `renderer.paramThreeToGL()`
 
 ### License ####
 
