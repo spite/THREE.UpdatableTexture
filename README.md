@@ -45,6 +45,10 @@ texture.update( source, x, y );
 
 `x` and `y` are the offsets inside the big texture in which to draw the smaller texture. The width and height of the smaller texture is read from the resource. Make sure offset plus dimensions is not bigger than the large texture dimensions.
 
+#### So how do I actually use it? ####
+
+This will let you update parts of the texture, the rest is up to your ideas and needs. For instance, you can pre-tile your assets and load them via `Fetch` and `createImageBitmap`, and update the final texture in a scheduled fashion. Or you can download a large image, and then update parts. Right now you need to create an intermediate canvas to hold the partial part of the image, since WebGL methods don't have cropping features, but they do in WebGL2.
+
 #### Modified three.js ####
 
 Since this is an object outside of the core of the library, it doesn't have access to some properties and methods from three.js. In order to convert three.js parameters to WebGL, there's a function called `paramThreeToGL` that needs to be publicly accessible. So after that function is defined in the code, just needs:
