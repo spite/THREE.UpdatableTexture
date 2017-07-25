@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - updatable texture</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				background-color: #000000;
+				margin: 0px;
+				overflow: hidden;
+			}
+
+			a {
+				color:#0078ff;
+			}
+
+			#info {
+				position: absolute;
+				top: 10px; width: 100%;
+				color: #ffffff;
+				padding: 5px;
+				font-family: Monospace;
+				font-size: 13px;
+				text-align: center;
+				z-index:100;
+			}
+
+			a {
+				color: orange;
+				text-decoration: none;
+			}
+
+			a:hover {
+				color: #0080ff;
+			}
+
+		</style>
+	</head>
+	<body>
+
+		<div id="info">
+			<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> - updatable texture WebGL demo
+		</div>
+
+		<script src="js/three_modified.js"></script>
+		<script src="js/OrbitControls.js"></script>
+
+		<script src="UpdatableTexture.js"></script>
+
+		<script>
+
+			var mouseX = 0, mouseY = 0,
+
+			windowHalfX = window.innerWidth / 2,
+			windowHalfY = window.innerHeight / 2,
+
+			camera, scene, renderer, controls;
+
+			init();
+			animate();
+
+			function init() {
+
+				var container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				camera = new THREE.PerspectiveCamera( 33, window.innerWidth / window.innerHeight, 1, 10000 );
+				camera.position.z = 1024;
+
+				scene = new THREE.Scene();
+
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+
+				controls = new THREE.OrbitControls( camera );
+
+				var texture = new UpdatableTexture();
+				texture.setRenderer( renderer );
+
+				texture.minFilter = texture.magFilter = THREE.NearestFilter;
+				texture.generateMipmaps = false;
+
+				var width = 512;
+				var height = 512;
+
+				var plane = new THREE.Mesh(
+					new THREE.PlaneBufferGeometry( width, height ),
+					new THREE.MeshBasicMaterial({
+						map: texture,
+						side: THREE.DoubleSide
+					})
+				);
+				scene.add( plane );
+
+				renderer.render( scene, camera );
+
+				var s = 32;
+				texture.setSize( width, height );
+
+				function fade() {
+
+					var color = `rgb(${~~(Math.random()*255)},${~~(Math.random()*255)},${~~(Math.random()*255)})`;
+
+					for( var y = 0; y < height; y += s ){
+						for( var x = 0; x < width; x += s ) {
+
+							(function( x, y ) {
+
+								function generate() {
+
+									var canvas = document.createElement( 'canvas' );
+									canvas.width = canvas.height = s;
+									var ctx = canvas.getContext( '2d' );
+
+									ctx.fillStyle = color;
+									ctx.fillRect( 0, 0, s, s );
+
+									ctx.globalAlpha = .5;
+
+									ctx.strokeStyle = '#000000'
+									ctx.beginPath();
+									ctx.moveTo( s, 0 );
+									ctx.lineTo( s, s );
+									ctx.lineTo( 0, s );
+									ctx.stroke();
+
+									ctx.strokeStyle = '#ffffff'
+									ctx.beginPath();
+									ctx.moveTo( s, 0 );
+									ctx.lineTo( 0, 0 );
+									ctx.lineTo( 0, s );
+									ctx.stroke();
+
+									texture.update( canvas, x, y );
+
+								}
+								setTimeout( generate, 500 * Math.random() );
+
+							})( x, y );
+
+						}
+					}
+
+					setTimeout( fade, 1000 );
+
+				}
+
+				fade();
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			function onWindowResize() {
+
+				windowHalfX = window.innerWidth / 2;
+				windowHalfY = window.innerHeight / 2;
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+				render();
+
+			}
+
+			function render() {
+
+				controls.update();
+
+				renderer.render( scene, camera );
+
+			}
+
+
+		</script>
+	</body>
+</html>
