@@ -4,8 +4,6 @@ An extended `THREE.Texture` to provide support for partial updates, via [`texSub
 
 `UpdatableTexture` lets you update only a part of a texture: it's useful for incremental loads of large images, for tiled resources, etc.
 
-**WARNING: requires a slightly modified version of three.js (see below for the reason)**
-
 Check a [demo of partially updated texture](https://spite.github.io/THREE.UpdatableTexture/).
 
 [![UpdatableTexture Demo](https://raw.githubusercontent.com/spite/THREE.UpdatableTexture/master/about/updatabletexture.jpg)](https://spite.github.io/THREE.UpdatableTexture)
@@ -13,9 +11,9 @@ Check a [demo of partially updated texture](https://spite.github.io/THREE.Updata
 The demo uses a 512x512 texture updated with blocks of 32x32. The best texture size and tile size it's a bit up to your target performance.
 
 #### How to use ####
-Include the modified three.js lib and the script in your project:
+Include three.js lib and the script in your project:
 ```html
-<script src="three_modified.js"></script>
+<script src="three.js"></script>
 <script src="UpdatableTexture.js"></script>
 ```
 
@@ -48,16 +46,6 @@ texture.update( source, x, y );
 #### So how do I actually use it? ####
 
 This will let you update parts of the texture, the rest is up to your ideas and needs. For instance, you can pre-tile your assets and load them via `Fetch` and `createImageBitmap`, and update the final texture in a scheduled fashion. Or you can download a large image, and then update parts. Right now you need to create an intermediate canvas to hold the partial part of the image, since WebGL methods don't have cropping features, but they do in WebGL2.
-
-#### Modified three.js ####
-
-Since this is an object outside of the core of the library, it doesn't have access to some properties and methods from three.js. In order to convert three.js parameters to WebGL, there's a function called `paramThreeToGL` that needs to be publicly accessible. So after that function is defined in the code, just needs:
-
-```js
-this.paramThreeToGL = paramThreeToGL;
-```
-
-and it's accesible via `renderer.paramThreeToGL()`
 
 ### License ####
 

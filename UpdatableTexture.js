@@ -29,6 +29,7 @@ UpdatableTexture.prototype.setRenderer = function( renderer ) {
 
 	this.renderer = renderer;
 	this.gl = this.renderer.getContext()
+	this.utils = THREE.WebGLUtils(this.gl, this.renderer.extensions)
 
 }
 
@@ -48,12 +49,12 @@ UpdatableTexture.prototype.setSize = function( width, height ) {
 	this.gl.texImage2D(
 		this.gl.TEXTURE_2D,
 		0,
-		this.renderer.paramThreeToGL( this.format ),
+		this.utils.convert( this.format ),
 		width,
 		height,
 		0,
-		this.renderer.paramThreeToGL( this.format ),
-		this.renderer.paramThreeToGL( this.type ),
+		this.utils.convert( this.format ),
+		this.utils.convert( this.type ),
 		null
 	);
 	this.gl.bindTexture( this.gl.TEXTURE_2D, activeTexture );
@@ -72,8 +73,8 @@ UpdatableTexture.prototype.update = function( src, x, y ) {
 		0,
 		x,
 		this.height - y - src.height,
-		this.renderer.paramThreeToGL( this.format ),
-		this.renderer.paramThreeToGL( this.type ),
+		this.utils.convert( this.format ),
+		this.utils.convert( this.type ),
 		src
 	);
 	this.gl.generateMipmap( this.gl.TEXTURE_2D );
