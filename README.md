@@ -3,7 +3,7 @@
 An extended `THREE.Texture` to provide support for partial updates, via [`texSubImage2D`](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texSubImage2D).
 
 #### 2026 update ####
-**Disclaimer:** this library is from 2017, and three.js has partial texture updates built in now, so you might not need it anymore
+**Disclaimer:** this library is from 2017, and three.js has had partial texture updates built in since r91 (2018), so you might not need it anymore
 ```js
 // allocate an empty 512x512 texture
 
