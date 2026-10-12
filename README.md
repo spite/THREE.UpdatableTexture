@@ -3,7 +3,7 @@
 An extended `THREE.Texture` to provide support for partial updates, via [`texSubImage2D`](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texSubImage2D).
 
 #### Demo ####
-- **[Texture updated tile by tile](https://spite.github.io/THREE.UpdatableTexture/)**: a 512x512 texture updated with blocks of 32x32
+- **[Texture updated tile by tile](https://spite.github.io/THREE.UpdatableTexture/examples/)**: a 512x512 texture updated with blocks of 32x32
 
 #### 2026 update ####
 **Disclaimer:** this library is from 2017, and three.js has had partial texture updates built in since r91 (2018), so you might not need it anymore
@@ -35,7 +35,7 @@ What it adds to the built-in way:
 
 `UpdatableTexture` lets you update only a part of a texture: it's useful for incremental loads of large images, for tiled resources, etc.
 
-[![UpdatableTexture Demo](https://raw.githubusercontent.com/spite/THREE.UpdatableTexture/master/about/updatabletexture.jpg)](https://spite.github.io/THREE.UpdatableTexture)
+[![UpdatableTexture Demo](https://raw.githubusercontent.com/spite/THREE.UpdatableTexture/master/about/updatabletexture.jpg)](https://spite.github.io/THREE.UpdatableTexture/examples/)
 
 The demo uses a 512x512 texture updated with blocks of 32x32. The best texture size and tile size it's a bit up to your target performance.
 
