@@ -43,19 +43,22 @@
 			<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> - updatable texture WebGL demo
 		</div>
 
-		<script src="js/three.js"></script>
-		<script src="js/OrbitControls.js"></script>
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+					"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+				}
+			}
+		</script>
 
-		<script src="UpdatableTexture.js"></script>
+		<script type="module">
 
-		<script>
+			import * as THREE from 'three';
+			import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+			import { UpdatableTexture } from './UpdatableTexture.js';
 
-			var mouseX = 0, mouseY = 0,
-
-			windowHalfX = window.innerWidth / 2,
-			windowHalfY = window.innerHeight / 2,
-
-			camera, scene, renderer, controls;
+			let camera, scene, renderer, controls;
 
 			init();
 			animate();
@@ -75,27 +78,26 @@
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				container.appendChild( renderer.domElement );
 
-				controls = new THREE.OrbitControls( camera );
+				controls = new OrbitControls( camera, renderer.domElement );
 
 				var texture = new UpdatableTexture();
 				texture.setRenderer( renderer );
 
 				texture.minFilter = texture.magFilter = THREE.NearestFilter;
 				texture.generateMipmaps = false;
+				texture.colorSpace = THREE.SRGBColorSpace;
 
 				var width = 512;
 				var height = 512;
 
 				var plane = new THREE.Mesh(
-					new THREE.PlaneBufferGeometry( width, height ),
+					new THREE.PlaneGeometry( width, height ),
 					new THREE.MeshBasicMaterial({
 						map: texture,
 						side: THREE.DoubleSide
 					})
 				);
 				scene.add( plane );
-
-				renderer.render( scene, camera );
 
 				var s = 32;
 				texture.setSize( width, height );
@@ -155,9 +157,6 @@
 			}
 
 			function onWindowResize() {
-
-				windowHalfX = window.innerWidth / 2;
-				windowHalfY = window.innerHeight / 2;
 
 				camera.aspect = window.innerWidth / window.innerHeight;
 				camera.updateProjectionMatrix();

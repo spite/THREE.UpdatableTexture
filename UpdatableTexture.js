@@ -1,83 +1,117 @@
-function UpdatableTexture( format, type, mapping, wrapS, wrapT, magFilter, minFilter, anisotropy, encoding ) {
+import {
+	Box2,
+	LinearFilter,
+	LinearMipmapLinearFilter,
+	Texture,
+	Vector2
+} from 'three';
 
-	THREE.Texture.call( this, null, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding );
+const source = new Texture();
+const region = new Box2();
+const position = new Vector2();
 
-	var canvas = document.createElement('canvas');
-	canvas.width = 1;
-	canvas.height = 1;
-	var ctx = canvas.getContext('2d');
-	var imageData = ctx.createImageData(1, 1);
+class UpdatableTexture extends Texture {
 
-	this.image = imageData;
+	constructor( format, type, mapping, wrapS, wrapT, magFilter = LinearFilter, minFilter = LinearMipmapLinearFilter, anisotropy, colorSpace ) {
 
-	this.magFilter = magFilter !== undefined ? magFilter : THREE.LinearFilter;
-	this.minFilter = minFilter !== undefined ? minFilter : THREE.LinearMipMapLinearFilter;
+		super( { data: null, width: 1, height: 1 }, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, colorSpace );
 
-	this.generateMipmaps = true;
-	this.flipY = true;
-	this.unpackAlignment = 1;
-	this.needsUpdate = true;
+		this.isUpdatableTexture = true;
+
+		// allocated from its size alone, like a data texture with nothing to upload yet
+		this.isDataTexture = true;
+		this.source.dataReady = false;
+
+		this.generateMipmaps = true;
+		this.flipY = true;
+		this.unpackAlignment = 1;
+
+		this.renderer = null;
+
+	}
+
+	get width() {
+
+		return this.image.width;
+
+	}
+
+	get height() {
+
+		return this.image.height;
+
+	}
+
+	setRenderer( renderer ) {
+
+		this.renderer = renderer;
+
+	}
+
+	setSize( width, height ) {
+
+		if ( ! this.renderer ) throw new Error( 'UpdatableTexture: call setRenderer() before setSize()' );
+
+		const max = this.renderer.capabilities.maxTextureSize;
+
+		if ( ! ( width >= 1 && width <= max && height >= 1 && height <= max ) ) {
+
+			throw new RangeError( 'UpdatableTexture: width and height must be between 1 and ' + max + ', got ' + width + 'x' + height );
+
+		}
+
+		width = Math.floor( width );
+		height = Math.floor( height );
+
+		if ( width === this.width && height === this.height && this.version > 0 ) return;
+
+		// GPU storage can't be resized, so it's released and allocated again
+		this.dispose();
+		this.image = { data: null, width, height };
+		this.source.dataReady = false;
+		this.needsUpdate = true;
+		this.renderer.initTexture( this );
+
+	}
+
+	update( src, x, y, width, height ) {
+
+		if ( ! this.renderer ) throw new Error( 'UpdatableTexture: call setRenderer() before update()' );
+
+		const isData = ArrayBuffer.isView( src );
+
+		if ( ! isData ) {
+
+			width = src.videoWidth || src.displayWidth || src.width;
+			height = src.videoHeight || src.displayHeight || src.height;
+
+		}
+
+		if ( ! ( width >= 1 && height >= 1 ) ) {
+
+			throw new Error( 'UpdatableTexture: the source has no size, a typed array needs update( data, x, y, width, height )' );
+
+		}
+
+		if ( x < 0 || y < 0 || x + width > this.width || y + height > this.height ) {
+
+			throw new RangeError( 'UpdatableTexture: ' + width + 'x' + height + ' at ' + x + ',' + y + ' does not fit in ' + this.width + 'x' + this.height );
+
+		}
+
+		source.isDataTexture = isData;
+		source.image = isData ? { data: src, width, height } : src;
+
+		region.min.set( 0, 0 );
+		region.max.set( width, height );
+		position.set( x, this.flipY ? this.height - y - height : y );
+
+		this.renderer.copyTextureToTexture( source, this, region, position );
+
+		source.image = null;
+
+	}
 
 }
 
-UpdatableTexture.prototype = Object.create( THREE.Texture.prototype );
-UpdatableTexture.prototype.constructor = UpdatableTexture;
-
-UpdatableTexture.prototype.isUpdatableTexture = true;
-
-UpdatableTexture.prototype.setRenderer = function( renderer ) {
-
-	this.renderer = renderer;
-	this.gl = this.renderer.getContext()
-	this.utils = THREE.WebGLUtils(this.gl, this.renderer.extensions)
-
-}
-
-UpdatableTexture.prototype.setSize = function( width, height ) {
-
-	if( width === this.width && height === this.height ) return;
-
-	var textureProperties = this.renderer.properties.get( this );
-	if( !textureProperties.__webglTexture ) return;
-
-	this.width = width;
-	this.height = height;
-
-	var activeTexture = this.gl.getParameter( this.gl.TEXTURE_BINDING_2D );
-	this.gl.bindTexture( this.gl.TEXTURE_2D, textureProperties.__webglTexture );
-	if( !textureProperties.__webglTexture ) this.width = null;
-	this.gl.texImage2D(
-		this.gl.TEXTURE_2D,
-		0,
-		this.utils.convert( this.format ),
-		width,
-		height,
-		0,
-		this.utils.convert( this.format ),
-		this.utils.convert( this.type ),
-		null
-	);
-	this.gl.bindTexture( this.gl.TEXTURE_2D, activeTexture );
-
-}
-
-UpdatableTexture.prototype.update = function( src, x, y ) {
-
-	var textureProperties = this.renderer.properties.get( this );
-	if( !textureProperties.__webglTexture ) return;
-
-	var activeTexture = this.gl.getParameter( this.gl.TEXTURE_BINDING_2D );
-	this.gl.bindTexture( this.gl.TEXTURE_2D, textureProperties.__webglTexture );
-	this.gl.texSubImage2D(
-		this.gl.TEXTURE_2D,
-		0,
-		x,
-		this.height - y - src.height,
-		this.utils.convert( this.format ),
-		this.utils.convert( this.type ),
-		src
-	);
-	this.gl.generateMipmap( this.gl.TEXTURE_2D );
-	this.gl.bindTexture( this.gl.TEXTURE_2D, activeTexture );
-
-}
+export { UpdatableTexture };
