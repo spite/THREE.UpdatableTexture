@@ -84,4 +84,4 @@ This will let you update parts of the texture, the rest is up to your ideas and 
 
 MIT licensed
 
-Copyright (C) 2017 Jaume Sanchez Elias, http://www.clicktorelease.com
+Copyright (C) 2017 Jaume Sanchez Elias, https://www.clicktorelease.com
